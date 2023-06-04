@@ -40,10 +40,11 @@ class TodoListController extends BaseController
      */
     public function index()
     {
+        // Find the data from database.
         $todoList = $this->todoListModel->findAll();
 
         return $this->respond([
-            "msg" => "success",
+            "msg"  => "success",
             "data" => $todoList
         ]);
     }
@@ -60,7 +61,12 @@ class TodoListController extends BaseController
             return $this->failNotFound("Enter the the todo key");
         }
 
+        // Find the data from database.
         $todo = $this->todoListModel->find($key);
+
+        if ($todo === null) {
+            return $this->failNotFound("Todo is not found.");
+        }
 
         return $this->respond([
             "msg" => "success",
@@ -78,8 +84,8 @@ class TodoListController extends BaseController
     {
         // Get the  data from request.
         $data    = $this->request->getJSON();
-        $title   = $data["title"] ?? null;
-        $content = $data["content"] ?? null;
+        $title   = $data->title   ?? null;
+        $content = $data->content ?? null;
 
         // Check if account and password is correct.
         if ($title === null || $content === null) {
@@ -99,14 +105,86 @@ class TodoListController extends BaseController
         ]);
 
         // Check if insert successfully.
-        if ($createdKey === null) {
+        if ($createdKey === false) {
             return $this->fail("create failed.");
         } else {
             return $this->respond([
-                "msg" => "create successfully",
+                "msg"  => "create successfully",
+                "data" => $createdKey
             ]);
         }
     }
 
-    
+    /**
+     * [PUT] /todo/{key}
+     *
+     * @param integer|null $key
+     * @return void
+     */
+    public function update(?int $key = null)
+    {
+        // Get the  data from request.
+        $data    = $this->request->getJSON();
+        $title   = $data->title   ?? null;
+        $content = $data->content ?? null;
+
+        if ($key === null) {
+            return $this->failNotFound("Key is not found.");
+        }
+
+        // Get the will update data.
+        $willUpdateData = $this->todoListModel->find($key);
+
+        if ($willUpdateData === null) {
+            return $this->failNotFound("This data is not found.");
+        }
+
+        if ($title !== null) {
+            $willUpdateData["t_title"] = $title;
+        }
+
+        if ($content !== null) {
+            $willUpdateData["t_content"] = $content;
+        }
+
+        // Do update action.
+        $isUpdated = $this->todoListModel->update($key, $willUpdateData);
+
+        if ($isUpdated === false) {
+            return $this->fail("Update failed.");
+        } else {
+            return $this->respond([
+                "msg" => "Update successfully"
+            ]);
+        }
+    }
+
+    /**
+     * [DELETE] /todo/{key}
+     *
+     * @param integer|null $key
+     * @return void
+     */
+    public function delete(?int $key = null)
+    {
+        if ($key === null) {
+            return $this->failNotFound("Key is not found.");
+        }
+
+        // Check the data is exist or not.
+        if ($this->todoListModel->find($key) === null) {
+            return $this->failNotFound("This data is not found.");
+        }
+
+        // Do delete action.
+        $isDeleted = $this->todoListModel->delete($key);
+
+        if ($isDeleted === false) {
+            return $this->fail("Delete failed.");
+        } else {
+            return $this->respond([
+                "msg" => "Delete successfully"
+            ]);
+        }
+    }
 }
