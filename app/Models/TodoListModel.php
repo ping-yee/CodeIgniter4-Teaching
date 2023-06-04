@@ -4,23 +4,21 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class MemberModel extends Model
+class TodoListModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'members';
-    protected $primaryKey       = 'id';
+    protected $table            = 'TodoLists';
+    protected $primaryKey       = 't_key';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'account',
-        'password',
-        'name'
+        't_title', 't_content'
     ];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
